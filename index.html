@@ -1,0 +1,551 @@
+<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShopEase - E-Commerce Frontend</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, sans-serif;
+}
+
+body{
+background:navyblue;
+}
+
+nav{
+background:coral;
+color:white;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 8%;
+position:sticky;
+top:0;
+z-index:1000;
+}
+
+.logo{
+font-size:25px;
+font-weight:bold;
+}
+
+.nav-links{
+display:flex;
+gap:20px;
+align-items:center;
+}
+
+.nav-links button{
+background:coral;
+border:none;
+padding:8px 15px;
+color:white;
+cursor:pointer;
+border-radius:5px;
+}
+
+.cart-btn{
+position:relative;
+}
+
+.cart-count{
+position:absolute;
+top:-10px;
+right:-10px;
+background:gray;
+color:white;
+width:20px;
+height:20px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:12px;
+}
+
+.hero{
+background:linear-gradient(135deg,dimgray,black);
+color:white;
+text-align:center;
+padding:60px 20px;
+}
+
+.hero h1{
+font-size:42px;
+margin-bottom:10px;
+}
+
+.hero p{
+font-size:18px;
+}
+
+.filters{
+display:flex;
+justify-content:center;
+gap:10px;
+flex-wrap:wrap;
+padding:20px;
+}
+
+.filters button{
+padding:10px 18px;
+border:none;
+background:orange;
+cursor:pointer;
+border-radius:5px;
+transition:0.3s;
+}
+
+.filters button:hover{
+background:yellow;
+color:white;
+}
+
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+padding:30px 8%;
+}
+
+.card{
+background:white;
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+transition:0.3s;
+}
+
+.card:hover{
+transform:translateY(-8px);
+box-shadow:0 10px 20px rgba(0,0,0,0.2);
+}
+
+.card img{
+width:100%;
+height:220px;
+object-fit:cover;
+}
+
+.card-body{
+padding:15px;
+}
+
+.card-body h3{
+margin-bottom:10px;
+}
+
+.price{
+color:blue;
+font-size:20px;
+font-weight:bold;
+margin-bottom:10px;
+}
+
+.rating{
+color:gold;
+margin-bottom:10px;
+}
+
+.btn-group{
+display:flex;
+gap:10px;
+}
+
+.btn{
+flex:1;
+padding:10px;
+border:none;
+cursor:pointer;
+border-radius:5px;
+}
+
+.details{
+background:darkgray;
+color:white;
+}
+
+.add{
+background:darkcyan;
+color:white;
+}
+
+.modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+justify-content:center;
+align-items:center;
+}
+
+.modal-content{
+background:white;
+padding:25px;
+width:90%;
+max-width:500px;
+border-radius:10px;
+text-align:center;
+}
+
+.modal-content img{
+width:100%;
+height:300px;
+object-fit:cover;
+margin-bottom:15px;
+}
+
+.close{
+float:right;
+cursor:pointer;
+font-size:24px;
+}
+
+.cart{
+position:fixed;
+top:0;
+right:-400px;
+width:350px;
+height:100%;
+background:white;
+box-shadow:-5px 0 10px rgba(0,0,0,0.2);
+padding:20px;
+transition:0.4s;
+overflow-y:auto;
+z-index:1001;
+}
+
+.cart.active{
+right:0;
+}
+
+.cart h2{
+margin-bottom:20px;
+}
+
+.cart-item{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:15px;
+padding-bottom:10px;
+border-bottom:1px solid #ddd;
+}
+
+.qty-btn{
+padding:2px 8px;
+margin:0 5px;
+cursor:pointer;
+}
+
+.remove{
+background:red;
+color:white;
+border:none;
+padding:5px 8px;
+cursor:pointer;
+}
+
+.total{
+font-size:20px;
+font-weight:bold;
+margin-top:20px;
+}
+
+footer{
+background:coral;
+color:white;
+text-align:center;
+padding:20px;
+margin-top:30px;
+}
+
+@media(max-width:768px){
+.hero h1{
+font-size:30px;
+}
+nav{
+flex-direction:column;
+gap:10px;
+}
+.cart{
+width:100%;
+}
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+<div class="logo">ShopEase</div>
+
+<div class="nav-links">
+<button class="cart-btn" onclick="toggleCart()">
+🛒 Cart
+<span class="cart-count" id="cartCount">0</span>
+</button>
+</div>
+</nav>
+
+<section class="hero">
+<h1>Welcome to ShopEase</h1>
+<p>Discover Amazing Products at Great Prices</p>
+</section>
+
+<div class="filters">
+<button onclick="filterProducts('all')">All</button>
+<button onclick="filterProducts('electronics')">Electronics</button>
+<button onclick="filterProducts('fashion')">Fashion</button>
+<button onclick="filterProducts('shoes')">Shoes</button>
+</div>
+
+<div class="products" id="productContainer"></div>
+
+<!-- Product Modal -->
+<div class="modal" id="modal">
+<div class="modal-content">
+<span class="close" onclick="closeModal()">&times;</span>
+<img id="modalImg">
+<h2 id="modalTitle"></h2>
+<p id="modalDesc"></p>
+<h3 id="modalPrice"></h3>
+</div>
+</div>
+
+<!-- Cart -->
+<div class="cart" id="cart">
+<h2>Shopping Cart</h2>
+<div id="cartItems"></div>
+<div class="total" id="totalPrice">Total: ₹0</div>
+</div>
+
+<footer>
+<p>© 2025 ShopEase E-Commerce Website</p>
+</footer>
+
+<script>
+
+const products = [
+
+{
+id:1,
+name:"Wireless Headphones",
+price:2999,
+category:"electronics",
+image:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
+description:"Premium wireless headphones with noise cancellation."
+},
+
+{
+id:2,
+name:"Smart Watch",
+price:4999,
+category:"electronics",
+image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30",
+description:"Track fitness and notifications with style."
+},
+
+{
+id:3,
+name:"Running Shoes",
+price:1999,
+category:"shoes",
+image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff",
+description:"Comfortable sports shoes for daily use."
+},
+
+{
+id:4,
+name:"Casual T-Shirt",
+price:799,
+category:"fashion",
+image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
+description:"Stylish cotton t-shirt for men and women."
+},
+
+{
+id:5,
+name:"Sneakers",
+price:2499,
+category:"shoes",
+image:"https://images.unsplash.com/photo-1600185365483-26d7a4cc7519",
+description:"Modern sneakers with premium comfort."
+},
+
+{
+id:6,
+name:"Denim Jacket",
+price:3499,
+category:"fashion",
+image:"https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRqGYoxlo7zIwxFK7dqnw9SE4rIGe9ZotbVJVkO33rQUhdtSnDlp-cZcwfJEXPpH6Gea_2015T5J7n4i08pM38xSJUTjeExxm14WBmxTesMWhUNXtfkfmLANA",
+description:"Trendy denim jacket for all seasons."
+}
+
+];
+
+let cart=[];
+
+function displayProducts(items){
+
+const container=document.getElementById("productContainer");
+
+container.innerHTML=items.map(product=>`
+
+<div class="card">
+<img src="${product.image}">
+<div class="card-body">
+
+<h3>${product.name}</h3>
+
+<div class="price">₹${product.price}</div>
+
+<div class="rating">⭐⭐⭐⭐⭐</div>
+
+<div class="btn-group">
+<button class="btn details"
+onclick="showDetails(${product.id})">
+Details
+</button>
+
+<button class="btn add"
+onclick="addToCart(${product.id})">
+Add Cart
+</button>
+</div>
+
+</div>
+</div>
+
+`).join('');
+}
+
+displayProducts(products);
+
+function filterProducts(category){
+
+if(category==="all"){
+displayProducts(products);
+}
+else{
+displayProducts(
+products.filter(p=>p.category===category)
+);
+}
+}
+
+function showDetails(id){
+
+let p=products.find(item=>item.id===id);
+
+document.getElementById("modal").style.display="flex";
+document.getElementById("modalImg").src=p.image;
+document.getElementById("modalTitle").innerText=p.name;
+document.getElementById("modalDesc").innerText=p.description;
+document.getElementById("modalPrice").innerText="₹"+p.price;
+}
+
+function closeModal(){
+document.getElementById("modal").style.display="none";
+}
+
+function addToCart(id){
+
+let product=products.find(p=>p.id===id);
+
+let existing=cart.find(item=>item.id===id);
+
+if(existing){
+existing.qty++;
+}else{
+cart.push({...product,qty:1});
+}
+
+updateCart();
+}
+
+function updateCart(){
+
+document.getElementById("cartCount").innerText=
+cart.reduce((sum,item)=>sum+item.qty,0);
+
+let cartHTML="";
+
+let total=0;
+
+cart.forEach(item=>{
+
+total+=item.price*item.qty;
+
+cartHTML+=`
+<div class="cart-item">
+
+<div>
+<b>${item.name}</b><br>
+
+<button class="qty-btn"
+onclick="changeQty(${item.id},-1)">-</button>
+
+${item.qty}
+
+<button class="qty-btn"
+onclick="changeQty(${item.id},1)">+</button>
+
+</div>
+
+<div>
+₹${item.price*item.qty}
+<button class="remove"
+onclick="removeItem(${item.id})">
+X
+</button>
+</div>
+
+</div>
+`;
+});
+
+document.getElementById("cartItems").innerHTML=cartHTML;
+document.getElementById("totalPrice").innerText=
+"Total: ₹"+total;
+}
+
+function changeQty(id,val){
+
+let item=cart.find(p=>p.id===id);
+
+item.qty+=val;
+
+if(item.qty<=0){
+cart=cart.filter(p=>p.id!==id);
+}
+
+updateCart();
+}
+
+function removeItem(id){
+
+cart=cart.filter(item=>item.id!==id);
+
+updateCart();
+}
+
+function toggleCart(){
+document.getElementById("cart")
+.classList.toggle("active");
+}
+
+</script>
+
+</body>
+</html>
+```
